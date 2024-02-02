@@ -21,10 +21,14 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "OpeningHours",
-			dependencies: [],
-			resources: [.copy("opening_hours.txt")]),
+			dependencies: []),
         .testTarget(
             name: "OpeningHoursTests",
-            dependencies: ["OpeningHours"]),
+            dependencies: ["OpeningHours"],
+            resources: [
+				.copy("opening_hours_valid.txt"),
+				.copy("opening_hours_invalid.txt"),
+			]
+		),
     ]
 )

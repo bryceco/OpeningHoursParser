@@ -1499,6 +1499,10 @@ class OpeningHours: ObservableObject, CustomStringConvertible {
 		}
 		return pos
 	}
+	
+	var hasError: Bool {
+		return errorIndex != nil
+	}
 
 	func printErrorMessage() {
 		print("\(stringRaw)")
