@@ -703,7 +703,7 @@ public enum DayOfYear: ParseElement {
 		}
 	}
 
-	var monthBinding: Int {
+	public internal(set) var monthBinding: Int {
 		get {
 			switch self {
 			case let .monthDate(mon):
@@ -996,8 +996,8 @@ public struct WeekRange: ParseElement {
 
 // "Apr 5-10" or "Apr 3-May 22"
 public struct MonthDayRange: ParseElement {
-	var begin: DayOfYear
-	var end: DayOfYear
+	public var begin: DayOfYear
+	public var end: DayOfYear
 
 	static let defaultValue = MonthDayRange(begin: DayOfYear.monthDate(MonthDate(month: .Jan, day: nil)),
 											end: DayOfYear.monthDate(MonthDate(month: .Dec, day: nil)))
