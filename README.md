@@ -1,2 +1,3 @@
 # OpeningHours
-Opening hours editor for OSM, written with SwiftUI
+
+Parser for OpenStreetMap [opening_hours](https://wiki.openstreetmap.org/wiki/Key:opening_hours)
