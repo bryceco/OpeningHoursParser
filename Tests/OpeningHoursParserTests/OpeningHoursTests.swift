@@ -33,23 +33,29 @@ final class OpeningHoursTests: XCTestCase {
 		}
 	}
 	
-	/*
-	func testValidityOfTestData() throws {
-		try withSampleData(in: "opening_hours") { stringValue in
-			let openingHours = OpeningHours(string: stringValue)
-			XCTAssertFalse(openingHours.ruleList.rules.isEmpty, "Unexpected error in '\(stringValue)' at position \(openingHours.errorPosition)")
-		}
-	}
 	func testDifferencesWhenSkippingMisplacedComma() throws {
 		try withSampleData(in: "opening_hours") { stringValue in
-			MonthsDaysHours.skipMisplacedComma = false
-			let oh1 = OpeningHours(string: stringValue)
 			MonthsDaysHours.skipMisplacedComma = true
-			let oh2 = OpeningHours(string: stringValue)
-			XCTAssertEqual(oh1.ruleList.rules.count, oh2.ruleList.rules.count, "Difference for: \(stringValue)")
+			let openingHoursSkippingMisplacedComma = OpeningHours(string: stringValue)
+			MonthsDaysHours.skipMisplacedComma = false
+			let openingHoursNotSkippingMisplacedComma = OpeningHours(string: stringValue)
+			
+			let rulesWhenSkipping = openingHoursSkippingMisplacedComma.ruleList.rules.count
+			let rulesWhenNotSkipping = openingHoursNotSkippingMisplacedComma.ruleList.rules.count
+			
+			// For opening hours that were deemed valid before
+			if rulesWhenNotSkipping > 0 {
+				// skipping misplaced commas should not result in invalid opening hours
+				XCTAssert(rulesWhenSkipping > 0, "Skipping comma made opening hours invalid: \(stringValue)")
+				// skipping misplaced commas should not result in more rules than before
+				XCTAssert(rulesWhenSkipping <= rulesWhenNotSkipping, "Skipping comma resulted in more rules (\(rulesWhenSkipping) vs \(rulesWhenNotSkipping)):  \(stringValue)")
+			}
+			
+			if rulesWhenSkipping == rulesWhenNotSkipping {
+				XCTAssertEqual(openingHoursSkippingMisplacedComma.description, openingHoursNotSkippingMisplacedComma.description, "Original: \(stringValue)")
+			}
 		}
 	}
-	*/
 	
 	func testMisplacedComma() throws {
 		let stringValue = "Dec 15-Apr 20,Jun 20-Jul 31, 07:30-12:30,16:00-19:30"
