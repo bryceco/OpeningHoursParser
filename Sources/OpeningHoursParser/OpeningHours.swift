@@ -1312,6 +1312,7 @@ public enum RuleSeparator: String, CaseIterable, ParseElement {
 
 // "Jan-Sep M-F 10:00-18:00"
 public struct MonthsDaysHours: ParseElement {
+	static var skipMisplacedComma = true
 
 	public var months: [MonthDayRange]
 	public var weeks: [WeekRange]
@@ -1325,6 +1326,9 @@ public struct MonthsDaysHours: ParseElement {
 	{
 		let months : [MonthDayRange] = MonthDayRangeList.scan(scanner: scanner) ?? []
 		let weeks : [WeekRange] = WeekRange.scanList(scanner: scanner) ?? []
+		if MonthsDaysHours.skipMisplacedComma {
+			_ = scanner.scanString(",")
+		}
 		let readabilitySeparator = scanner.scanString(":")
 		let daysHours : [DaysHours] = Util.parseList(scanner: scanner, scan: DaysHours.scan, delimiter: ",") ?? []
 		let modifier = Modifier.scan(scanner: scanner)
