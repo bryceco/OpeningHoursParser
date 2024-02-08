@@ -7,16 +7,16 @@
 
 import Foundation
 
-protocol ParseElement : Hashable, CustomStringConvertible, CustomDebugStringConvertible {
+public protocol ParseElement : Hashable, CustomStringConvertible, CustomDebugStringConvertible {
 	static func scan(scanner: Scanner) -> Self?
 	func toString() -> String
 }
 
 extension ParseElement {
-	var description: String {
+	public var description: String {
 		return toString()
 	}
-	var debugDescription: String {
+	public var debugDescription: String {
 		return toString()
 	}
 }
@@ -144,9 +144,9 @@ class Util {
 	}
 }
 
-struct Comment: ParseElement {
-	var text: String
-	static func scan(scanner: Scanner) -> Comment? {
+public struct Comment: ParseElement {
+	public var text: String
+	public static func scan(scanner: Scanner) -> Comment? {
 		let index = scanner.currentIndex
 		if scanner.scanString("\"") != nil {
 			if let s = scanner.scanUpToString("\"") {
@@ -157,18 +157,18 @@ struct Comment: ParseElement {
 		}
 		return nil
 	}
-	func toString() -> String {
+	public func toString() -> String {
 		return "\"\(text)\""
 	}
 }
 
-enum Modifier: String, CaseIterable, ParseElement {
+public enum Modifier: String, CaseIterable, ParseElement {
 	case open = "open"
 	case closed = "closed"
 	case off = "off"
 	case unknown = "unknown"
 
-	static func scan(scanner:Scanner) -> Modifier?
+	public static func scan(scanner:Scanner) -> Modifier?
 	{
 		for value in Modifier.allCases {
 			if scanner.scanWord(value.rawValue) != nil {
@@ -178,14 +178,14 @@ enum Modifier: String, CaseIterable, ParseElement {
 		return nil
 	}
 
-	func toString() -> String
+	public func toString() -> String
 	{
 		return self.rawValue
 	}
 }
 
 // "05:30"
-enum Hour: CaseIterable, ParseElement {
+public enum Hour: CaseIterable, ParseElement {
 	// items with a possible offset:
 	case sunrise(Int)
 	case sunset(Int)
@@ -197,7 +197,7 @@ enum Hour: CaseIterable, ParseElement {
 	case none			// used when trailing time of a range is missing
 
 	// time must be first here:
-	static var allCases: [Hour] = [.time(0),.sunrise(0),.sunset(0),.dawn(0),.dusk(0)]
+	public static var allCases: [Hour] = [.time(0),.sunrise(0),.sunset(0),.dawn(0),.dusk(0)]
 
 	func toMinute() -> Int?
 	{
@@ -216,7 +216,7 @@ enum Hour: CaseIterable, ParseElement {
 	static let PMs = ["PM","P.M."]
 	static let minuteSeparators = CharacterSet(charactersIn: ":_.")
 
-	static func scan(scanner:Scanner) -> Hour?
+	public static func scan(scanner:Scanner) -> Hour?
 	{
 		let index = scanner.currentIndex
 		let skipped = scanner.charactersToBeSkipped
@@ -309,7 +309,7 @@ enum Hour: CaseIterable, ParseElement {
 		}
 	}
 
-	func toString() -> String
+	public func toString() -> String
 	{
 		var name: String
 		var offset: Int
@@ -394,7 +394,7 @@ enum Hour: CaseIterable, ParseElement {
 }
 
 // "Mo"
-enum Weekday: Int, CaseIterable, ParseElement {
+public enum Weekday: Int, CaseIterable, ParseElement {
 
 	case Mo
 	case Tu
@@ -414,7 +414,7 @@ enum Weekday: Int, CaseIterable, ParseElement {
 		["Sunday"]
 	]
 
-	static func scan(scanner:Scanner) -> Weekday?
+	public static func scan(scanner:Scanner) -> Weekday?
 	{
 		for day in synonyms.indices {
 			for text in synonyms[day] {
@@ -426,16 +426,16 @@ enum Weekday: Int, CaseIterable, ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return String(Weekday.synonyms[self.rawValue][0].prefix(2))
 	}
 }
 
-enum PublicHoliday: String, CaseIterable, ParseElement {
+public enum PublicHoliday: String, CaseIterable, ParseElement {
 	case PH = "PH"
 	case SH = "SH"
 
-	static func scan(scanner: Scanner) -> PublicHoliday? {
+	public static func scan(scanner: Scanner) -> PublicHoliday? {
 		for value in PublicHoliday.allCases {
 			if scanner.scanWord(value.rawValue) != nil {
 				return value
@@ -443,17 +443,17 @@ enum PublicHoliday: String, CaseIterable, ParseElement {
 		}
 		return nil
 	}
-	func toString() -> String {
+	public func toString() -> String {
 		return self.rawValue
 	}
 }
 
 // "We[-1]"
-struct NthWeekday: ParseElement {
-	var weekday: Weekday
-	var nth: NthEntry
+public struct NthWeekday: ParseElement {
+	public var weekday: Weekday
+	public var nth: NthEntry
 
-	static func scan(scanner: Scanner) -> NthWeekday? {
+	public static func scan(scanner: Scanner) -> NthWeekday? {
 		let index = scanner.currentIndex
 		if let day = Weekday.scan(scanner: scanner),
 		   let nthList = NthEntryList.scan(scanner: scanner),
@@ -467,16 +467,16 @@ struct NthWeekday: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return "\(weekday.toString())[\(nth.toString())]"
 	}
 }
 
 // "23"
-struct Day : ParseElement {
-	var rawValue : Int
+public struct Day : ParseElement {
+	public var rawValue : Int
 
-	static let allCases = Array(1...31).map({Day($0)!})
+	public static let allCases = Array(1...31).map({Day($0)!})
 
 	init?(_ d:Int) {
 		if d < 1 || d > 31 {
@@ -485,7 +485,7 @@ struct Day : ParseElement {
 		self.rawValue = d
 	}
 
-	static func scan(scanner: Scanner) -> Day? {
+	public static func scan(scanner: Scanner) -> Day? {
 		let index = scanner.currentIndex
 		if let d = scanner.scanInt(),
 		   let day = Day(d)
@@ -496,13 +496,13 @@ struct Day : ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return "\(self.rawValue)"
 	}
 }
 
 // "Jan"
-enum Month : Int, CaseIterable, ParseElement {
+public enum Month : Int, CaseIterable, ParseElement {
 	case Jan
 	case Feb
 	case Mar
@@ -518,11 +518,11 @@ enum Month : Int, CaseIterable, ParseElement {
 
 	public static let names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
-	func toString() -> String {
+	public func toString() -> String {
 		return Month.names[self.rawValue]
 	}
 
-	static func scan(scanner:Scanner) -> Month?
+	public static func scan(scanner:Scanner) -> Month?
 	{
 		for month in Month.allCases {
 			if scanner.scanWord(month.toString()) != nil {
@@ -534,10 +534,10 @@ enum Month : Int, CaseIterable, ParseElement {
 	}
 }
 
-struct Year: ParseElement, Hashable, Equatable {
-	var rawValue: Int
+public struct Year: ParseElement, Hashable, Equatable {
+	public var rawValue: Int
 
-	static func scan(scanner: Scanner) -> Year? {
+	public static func scan(scanner: Scanner) -> Year? {
 		let index = scanner.currentIndex
 		if let year = scanner.scanInt(),
 		   year >= 1900
@@ -548,22 +548,22 @@ struct Year: ParseElement, Hashable, Equatable {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return "\(self.rawValue)"
 	}
 }
 
-enum HolidayName: String, CaseIterable {
+public enum HolidayName: String, CaseIterable {
 	case easter = "easter"
 	case thanksgiving = "thanksgiving"
 }
 
-struct HolidayDate: ParseElement {
-	var year: Year?
-	var holiday: HolidayName
-	var offset: DayOffset?
+public struct HolidayDate: ParseElement {
+	public var year: Year?
+	public var holiday: HolidayName
+	public var offset: DayOffset?
 
-	static func scan(scanner: Scanner) -> HolidayDate? {
+	public static func scan(scanner: Scanner) -> HolidayDate? {
 		for date in HolidayName.allCases {
 			if scanner.scanWord(date.rawValue) != nil {
 				_ = scanner.scanWord("day")	// "thanksgiving day"
@@ -574,20 +574,20 @@ struct HolidayDate: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		let a = [year?.toString(), self.holiday.rawValue, offset?.toString() ]
 		return Util.stringListToString(list: a, delimeter: " ")
 	}
 }
 
 // "Jan" or "Jan 5" or "Jan Su[-1]"
-struct MonthDate: ParseElement {
-	var year: Year?
-	var month: Month
-	var day: Day?					// day and nthWeekday are mutually exclusive
-	var nthWeekday: NthWeekday?
+public struct MonthDate: ParseElement {
+	public var year: Year?
+	public var month: Month
+	public var day: Day?					// day and nthWeekday are mutually exclusive
+	public var nthWeekday: NthWeekday?
 
-	static func scan(scanner:Scanner) -> MonthDate?
+	public static func scan(scanner:Scanner) -> MonthDate?
 	{
 		let index = scanner.currentIndex
 		let year = Year.scan(scanner: scanner)
@@ -612,7 +612,7 @@ struct MonthDate: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		let d = day?.toString() ?? nthWeekday?.toString() ?? nil
 		let a = [year?.toString(), month.toString(), d]
 		return Util.stringListToString(list: a, delimeter: " ")
@@ -632,11 +632,11 @@ struct MonthDate: ParseElement {
 	}
 }
 
-enum DayOfYear: ParseElement {
+public enum DayOfYear: ParseElement {
 	case monthDate(MonthDate)
 	case holidayDate(HolidayDate)
 
-	static func scan(scanner: Scanner) -> DayOfYear? {
+	public static func scan(scanner: Scanner) -> DayOfYear? {
 		if let mon = MonthDate.scan(scanner: scanner) {
 			return DayOfYear.monthDate(mon)
 		}
@@ -646,7 +646,7 @@ enum DayOfYear: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		switch self {
 		case let .monthDate(mon):
 			return mon.toString()
@@ -703,7 +703,7 @@ enum DayOfYear: ParseElement {
 		}
 	}
 
-	var monthBinding: Int {
+	public internal(set) var monthBinding: Int {
 		get {
 			switch self {
 			case let .monthDate(mon):
@@ -754,7 +754,7 @@ enum DayOfYear: ParseElement {
 }
 
 // "5:30-10:30"
-struct HourRange: ParseElement {
+public struct HourRange: ParseElement {
 
 	public var begin : Hour
 	public var end : Hour
@@ -764,7 +764,7 @@ struct HourRange: ParseElement {
 	static let allDay = HourRange(begin: Hour.time(0), end: Hour.time(24*60), plus: false)
 	static let daytime = HourRange(begin: Hour.sunrise(0), end: Hour.sunset(0), plus: false)
 
-	static func scan(scanner:Scanner) -> HourRange?
+	public static func scan(scanner:Scanner) -> HourRange?
 	{
 		if scanner.scanString("daytime") != nil ||
 			scanner.scanString("day time") != nil
@@ -789,7 +789,7 @@ struct HourRange: ParseElement {
 		return nil
 	}
 
-	func toString() -> String
+	public func toString() -> String
 	{
 		if end == Hour.none {
 			return "\(begin.toString())\(plus ?"+":"")"
@@ -811,12 +811,12 @@ struct HourRange: ParseElement {
 }
 
 // "-39 days"
-struct DayOffset: ParseElement {
+public struct DayOffset: ParseElement {
 	var offset: Int
 
 	static let prefixChars = CharacterSet.init(charactersIn: "+-")
 
-	static func scan(scanner: Scanner) -> DayOffset? {
+	public static func scan(scanner: Scanner) -> DayOffset? {
 		let index = scanner.currentIndex
 		if let prefix = scanner.scanCharacters(from: prefixChars),
 			prefix.count == 1,
@@ -831,20 +831,20 @@ struct DayOffset: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return "\(offset > 0 ? "+" : "-")\(offset) \(abs(offset)==1 ? "day" : "days")"
 	}
 }
 
 // "1-3"
-struct NthEntry: ParseElement {
-	var begin: Int
-	var end: Int
+public struct NthEntry: ParseElement {
+	public var begin: Int
+	public var end: Int
 
 	static func inRange(_ index:Int) -> Bool {
 		return (index >= 1 && index <= 5) || (index >= -5 && index <= -1)
 	}
-	static func scan(scanner: Scanner) -> NthEntry? {
+	public static func scan(scanner: Scanner) -> NthEntry? {
 		let index = scanner.currentIndex
 		if let begin = scanner.scanInt(),
 		   inRange(begin)
@@ -864,7 +864,7 @@ struct NthEntry: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		if begin == end {
 			return "\(begin)"
 		} else {
@@ -874,10 +874,10 @@ struct NthEntry: ParseElement {
 }
 
 // "[-1,1-3]"
-struct NthEntryList: ParseElement {
+public struct NthEntryList: ParseElement {
 	var list:[NthEntry]
 
-	static func scan(scanner: Scanner) -> NthEntryList? {
+	public static func scan(scanner: Scanner) -> NthEntryList? {
 		let index = scanner.currentIndex
 		if scanner.scanString("[") != nil,
 		   let list:[NthEntry] = Util.parseList(scanner: scanner, scan:NthEntry.scan, delimiter: ","),
@@ -888,20 +888,20 @@ struct NthEntryList: ParseElement {
 		scanner.currentIndex = index
 		return nil
 	}
-	func toString() -> String {
+	public func toString() -> String {
 		return "[" + Util.elementListToString(list: list, delimeter: ",") + "]"
 	}
 }
 
 // "Mo-Fr" or "Mo[-1]" or "PH"
-enum WeekdayRange: ParseElement {
+public enum WeekdayRange: ParseElement {
 	case holiday(PublicHoliday)
 	case weekday(Weekday,NthEntryList?,DayOffset?)
 	case weekdays(Weekday,Weekday)
 
 	static let allDays = WeekdayRange.weekdays(.Mo, .Su)
 
-	static func scan(scanner:Scanner) -> WeekdayRange?
+	public static func scan(scanner:Scanner) -> WeekdayRange?
 	{
 		if let holiday = PublicHoliday.scan(scanner: scanner) {
 			return WeekdayRange.holiday(holiday)
@@ -928,7 +928,7 @@ enum WeekdayRange: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		switch self {
 		case let .holiday(holiday):
 			return holiday.toString()
@@ -946,12 +946,12 @@ enum WeekdayRange: ParseElement {
 }
 
 // week "5-9"
-struct WeekRange: ParseElement {
-	var begin: Int
-	var end: Int
-	var slash: Int?
+public struct WeekRange: ParseElement {
+	public var begin: Int
+	public var end: Int
+	public var slash: Int?
 
-	static func scan(scanner: Scanner) -> WeekRange? {
+	public static func scan(scanner: Scanner) -> WeekRange? {
 		if let (begin,end):(Int,Int) = Util.parseRange(scanner: scanner, scan:{ scanner in
 			let index = scanner.currentIndex
 			if let item = scanner.scanInt(),
@@ -976,7 +976,7 @@ struct WeekRange: ParseElement {
 		return nil
 	}
 
-	static func scanList(scanner: Scanner) -> [WeekRange]? {
+	public static func scanList(scanner: Scanner) -> [WeekRange]? {
 		let index = scanner.currentIndex
 		if scanner.scanString("week") != nil,
 		   let list = Util.parseList(scanner: scanner, scan: WeekRange.scan, delimiter: ",")
@@ -987,7 +987,7 @@ struct WeekRange: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		let base = begin == end ? "\(begin)" : "\(begin)-\(end)"
 		let s = slash == nil ? "" : "\\\(slash!)"
 		return base + s
@@ -995,14 +995,14 @@ struct WeekRange: ParseElement {
 }
 
 // "Apr 5-10" or "Apr 3-May 22"
-struct MonthDayRange: ParseElement {
-	var begin: DayOfYear
-	var end: DayOfYear
+public struct MonthDayRange: ParseElement {
+	public var begin: DayOfYear
+	public var end: DayOfYear
 
 	static let defaultValue = MonthDayRange(begin: DayOfYear.monthDate(MonthDate(month: .Jan, day: nil)),
 											end: DayOfYear.monthDate(MonthDate(month: .Dec, day: nil)))
 
-	static func scan(scanner: Scanner) -> MonthDayRange?
+	public static func scan(scanner: Scanner) -> MonthDayRange?
 	{
 		if let first = DayOfYear.scan(scanner: scanner) {
 			let dashIndex = scanner.currentIndex
@@ -1042,7 +1042,7 @@ struct MonthDayRange: ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		if begin == end {
 			return "\(begin)"
 		} else {
@@ -1092,12 +1092,12 @@ struct MonthDayRangeList {
 
 
 // "Mo-Fr 6:00-18:00, Sa,Su 6:00-12:00"
-struct DaysHours: ParseElement {
+public struct DaysHours: ParseElement {
 
-	var weekdays : [WeekdayRange]
-	var holidays : [PublicHoliday]
-	var holidayFilter : [PublicHoliday] // for space-seperated days: "PH Sa-Su" (i.e. holidays that fall on a weekend)
-	var hours : [HourRange]
+	public var weekdays : [WeekdayRange]
+	public var holidays : [PublicHoliday]
+	public var holidayFilter : [PublicHoliday] // for space-seperated days: "PH Sa-Su" (i.e. holidays that fall on a weekend)
+	public var hours : [HourRange]
 
 	static let everyDay:Set<Int> = [0,1,2,3,4,5,6]
 
@@ -1113,7 +1113,7 @@ struct DaysHours: ParseElement {
 						  "24 Horas"
 	]
 
-	static func scan(scanner: Scanner) -> DaysHours?
+	public static func scan(scanner: Scanner) -> DaysHours?
 	{
 		if scanner.scanAnyWord(all247) != nil {
 			return DaysHours.hours_24_7
@@ -1166,7 +1166,7 @@ struct DaysHours: ParseElement {
 	}
 
 
-	func toString() -> String {
+	public func toString() -> String {
 		let days = Util.elementListToString(list: weekdays, delimeter: ",")
 		let holi = Util.elementListToString(list: holidays, delimeter: ",")
 		let filter = Util.elementListToString(list: holidayFilter, delimeter: ",")
@@ -1291,12 +1291,12 @@ struct DaysHours: ParseElement {
 	}
 }
 
-enum RuleSeparator: String, CaseIterable, ParseElement {
+public enum RuleSeparator: String, CaseIterable, ParseElement {
 	case semiColon = ";"
 	case comma = ","
 	case doubleBar = "||"
 
-	static func scan(scanner: Scanner) -> RuleSeparator? {
+	public static func scan(scanner: Scanner) -> RuleSeparator? {
 		for item in RuleSeparator.allCases {
 			if scanner.scanString(item.rawValue) != nil {
 				return item
@@ -1305,23 +1305,23 @@ enum RuleSeparator: String, CaseIterable, ParseElement {
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return self.rawValue + " "
 	}
 }
 
 // "Jan-Sep M-F 10:00-18:00"
-struct MonthsDaysHours: ParseElement {
+public struct MonthsDaysHours: ParseElement {
 
-	var months: [MonthDayRange]
-	var weeks: [WeekRange]
-	var readabilitySeparator: String?
-	var daysHours: [DaysHours]
-	var modifier : Modifier?
-	var comment : Comment?
-	var ruleSeparator : RuleSeparator?
+	public var months: [MonthDayRange]
+	public var weeks: [WeekRange]
+	public var readabilitySeparator: String?
+	public var daysHours: [DaysHours]
+	public var modifier : Modifier?
+	public var comment : Comment?
+	public var ruleSeparator : RuleSeparator?
 
-	static func scan(scanner:Scanner) -> MonthsDaysHours?
+	public static func scan(scanner:Scanner) -> MonthsDaysHours?
 	{
 		let months : [MonthDayRange] = MonthDayRangeList.scan(scanner: scanner) ?? []
 		let weeks : [WeekRange] = WeekRange.scanList(scanner: scanner) ?? []
@@ -1342,7 +1342,7 @@ struct MonthsDaysHours: ParseElement {
 							   ruleSeparator: ruleSeparator)
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		return toString(withRuleSeparator:true)
 	}
 	func toString(withRuleSeparator:Bool) -> String {
@@ -1363,7 +1363,7 @@ struct MonthsDaysHours: ParseElement {
 		return r
 	}
 
-	func is24_7() -> Bool {
+	public func is24_7() -> Bool {
 		if months.count == 0,
 		   daysHours.count == 1,
 		   daysHours.first!.is24_7()
@@ -1399,17 +1399,17 @@ struct MonthsDaysHours: ParseElement {
 	}
 }
 
-struct RuleList: ParseElement {
-	var rules : [MonthsDaysHours]
+public struct RuleList: ParseElement {
+	public var rules : [MonthsDaysHours]
 
-	static func scan(scanner: Scanner) -> RuleList? {
+	public static func scan(scanner: Scanner) -> RuleList? {
 		if let list : [MonthsDaysHours] = Util.parseList(scanner: scanner, scan: MonthsDaysHours.scan, delimiter: "" ) {
 			return RuleList(rules: list)
 		}
 		return nil
 	}
 
-	func toString() -> String {
+	public func toString() -> String {
 		var s = ""
 		for index in rules.indices {
 			let i = rules[index].toString(withRuleSeparator: index < rules.count-1)
@@ -1431,9 +1431,9 @@ struct RuleList: ParseElement {
 	}
 }
 
-class OpeningHours: ObservableObject, CustomStringConvertible {
+public class OpeningHours: ObservableObject, CustomStringConvertible {
 
-	@Published var ruleList : RuleList
+	@Published public internal(set) var ruleList : RuleList
 	private var stringRaw : String
 	private var errorIndex : String.Index?
 
