@@ -1325,6 +1325,7 @@ public struct MonthsDaysHours: ParseElement {
 	public static func scan(scanner:Scanner) -> MonthsDaysHours?
 	{
 		let months : [MonthDayRange] = MonthDayRangeList.scan(scanner: scanner) ?? []
+		let _ = scanner.scanString(",")
 		let weeks : [WeekRange] = WeekRange.scanList(scanner: scanner) ?? []
 		if MonthsDaysHours.skipMisplacedComma {
 			_ = scanner.scanString(",")
@@ -1354,8 +1355,10 @@ public struct MonthsDaysHours: ParseElement {
 			return "24/7"
 		}
 		let m = Util.elementListToString(list: months, delimeter: ",")
+		let w = Util.elementListToString(list: weeks, delimeter: ",")
 		let dh = Util.elementListToString(list: daysHours, delimeter: ", ")
 		let a = [m,
+				 w == "" ? "" : "week " + w,
 				 readabilitySeparator,
 				 dh,
 				 modifier?.toString(),
