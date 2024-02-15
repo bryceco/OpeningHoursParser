@@ -10,31 +10,8 @@ final class OpeningHoursTests: XCTestCase {
 		XCTAssert(rule.is24_7())
 	}
 	
-	private func withSampleData(in testFileName: String, file: StaticString = #filePath, line: UInt = #line, check: (String) -> Void) throws {
-		let sampleDataURL = try XCTUnwrap(Bundle.module.url(forResource: testFileName, withExtension: "txt"), file: file, line: line)
-		
-		let sampleData = try String(contentsOf: sampleDataURL, encoding: .utf8)
-		
-		let lines = sampleData.components(separatedBy: .newlines)
-		
-		for lineIndex in lines.indices {
-			let line = lines[lineIndex]
-			
-			let components = line.split(separator: "\t", maxSplits: 1)
-			
-			
-			guard components.count == 2 else {
-				continue
-			}
-			
-			let stringValue = String(components[1])
-			
-			check(stringValue)
-		}
-	}
-	
-	func testDifferencesWhenSkippingMisplacedComma() throws {
-		try withSampleData(in: "opening_hours") { stringValue in
+	func testDifferencesWhenSkippingMisplacedComma() async throws {
+		try await withSampleData(in: "opening_hours") { stringValue in
 			MonthsDaysHours.skipMisplacedComma = true
 			let openingHoursSkippingMisplacedComma = OpeningHours(string: stringValue)
 			MonthsDaysHours.skipMisplacedComma = false
@@ -63,3 +40,28 @@ final class OpeningHoursTests: XCTestCase {
 		XCTAssertEqual(openingHours.ruleList.rules.count, 1)
 	}
 }
+
+extension XCTestCase {
+	func withSampleData(in testFileName: String, file: StaticString = #filePath, line: UInt = #line, check: @escaping (String) async -> Void) async throws {
+		try await withLines(in: testFileName, file: file, line: line) { line in
+			let components = line.split(separator: "\t", maxSplits: 1)
+			guard components.count == 2 else {
+				return
+			}
+			
+			await check(String(components[1]))
+		}
+	}
+	
+	func withLines(in testFileName: String, file: StaticString = #filePath, line: UInt = #line, check: @escaping (String) async -> Void) async throws {
+		let sampleDataURL = try XCTUnwrap(Bundle.module.url(forResource: testFileName, withExtension: "txt"), file: file, line: line)
+		
+		let handle = try FileHandle(forReadingFrom: sampleDataURL)
+		for try await line in handle.bytes.lines {
+			await check(line)
+		}
+		
+		try handle.close()
+	}
+}
+
