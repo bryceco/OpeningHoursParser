@@ -11,6 +11,7 @@ import WebKit
 import OpeningHoursParser
 
 
+@available(iOS 15.0, *)
 class CompareWithEvaluationToolTests: XCTestCase {
 	var webView: WKWebView?
 	
@@ -82,6 +83,36 @@ class CompareWithEvaluationToolTests: XCTestCase {
 		let isValid = try await isValidAccordingToEvaluationTool("24/7")
 		XCTAssertTrue(isValid)
 	}
+	
+	func testDifferencesWithEvaluationTool() async throws {
+		let tempFolder = try FileManager.default.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: FileManager.default.temporaryDirectory, create: true)
+		let validButUnparsable = tempFolder.appendingPathComponent("oh_valid_unparsable.txt", isDirectory: false)
+		let invalidButParsable = tempFolder.appendingPathComponent("oh_invalid_parsable.txt", isDirectory: false)
+		
+		print("Writing results to \(tempFolder.path)")
+		
+		var differences = 0
+		
+		try await withLines(in: "opening_hours") { line in
+			let components = line.split(separator: "\t", maxSplits: 1)
+			guard components.count == 2 else {
+				return
+			}
+			let stringValue = String(components[1])
+			do {
+				let isValid = try await self.isValidAccordingToEvaluationTool(stringValue)
+				let isParsable = try self.isValidAccordingToOpeningHoursParser(stringValue)
+				
+				if isValid != isParsable {
+					try "\(line)\n".append(to: isValid ? validButUnparsable : invalidButParsable)
+					differences += 1
+				}
+			} catch {
+				XCTFail("Exception for \(stringValue): \(error)")
+			}
+		}
+		XCTAssertEqual(differences, 0)
+	}
 }
 
 
@@ -108,3 +139,30 @@ extension String {
 	}
 }
 
+extension Data {
+	func append(to fileURL: URL) throws {
+		if FileManager.default.fileExists(atPath: fileURL.path) {
+			let handle = try FileHandle(forWritingTo: fileURL)
+			defer {
+				try? handle.close()
+			}
+			try handle.seekToEnd()
+			try handle.write(contentsOf: self)
+		} else {
+			try self.write(to: fileURL, options: .atomic)
+		}
+	}
+}
+
+extension String {
+	enum EncodingError: Error {
+		case utf8ConversionFailed
+	}
+	func append(to fileURL: URL) throws {
+		guard let data = self.data(using: .utf8, allowLossyConversion: true) else {
+			throw EncodingError.utf8ConversionFailed
+		}
+		
+		try data.append(to: fileURL)
+	}
+}
