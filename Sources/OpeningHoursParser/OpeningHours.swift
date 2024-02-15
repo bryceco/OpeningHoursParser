@@ -1110,7 +1110,11 @@ public struct DaysHours: ParseElement {
 						  "24hours",
 						  "24hr",
 						  "All day",
-						  "24 Horas"
+						  "24 Horas",
+						  "always",
+						  "nonstop",
+						  "always open",
+						  "7 days"
 	]
 
 	public static func scan(scanner: Scanner) -> DaysHours?
