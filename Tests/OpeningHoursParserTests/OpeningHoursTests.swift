@@ -10,6 +10,7 @@ final class OpeningHoursTests: XCTestCase {
 		XCTAssert(rule.is24_7())
 	}
 	
+	@available(iOS 15.0, *)
 	func testDifferencesWhenSkippingMisplacedComma() async throws {
 		try await withSampleData(in: "opening_hours") { stringValue in
 			MonthsDaysHours.skipMisplacedComma = true
@@ -41,6 +42,7 @@ final class OpeningHoursTests: XCTestCase {
 	}
 }
 
+@available(iOS 15.0, *)
 extension XCTestCase {
 	func withSampleData(in testFileName: String, file: StaticString = #filePath, line: UInt = #line, check: @escaping (String) async -> Void) async throws {
 		try await withLines(in: testFileName, file: file, line: line) { line in
